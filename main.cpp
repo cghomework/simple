@@ -3,6 +3,7 @@
 #include <vector>
 #include <windows.h>
 #include <GL\glut.h>
+#include <cstring>
 #include "button.h"
 #include "Texture.h"
 //如果用全局坐标系的思想来考虑问题，那么必须要注意矩阵乘法的顺序和代码中的顺序是相反的。而用局部坐标系来思考的话，所有的操作都是针对于当前不断变化的坐标系，因此，矩阵乘法很自然的与他们再代码中出现的顺序一样。
@@ -10,8 +11,13 @@
 using std::vector;
 using std::pair;
 
-GLfloat windowLeft, windowDown;
+#define MAX_PATH_NAME 128
+void init() {
+	
 
+}
+
+GLfloat windowLeft, windowDown;
 void reshape(int w, int h)//自动传入新窗口的大小（像素）
 {
 	glViewport(0, 0, w, h);//在窗口中显示的区域：显示区域左下角坐标显示区域的宽度与高度
@@ -139,7 +145,7 @@ void display()
 			glVertex3f(vertices[i][0], vertices[i][1], vertices[i][2]);
 		glEnd();
 		break;
-	case BALL:
+	case BALL://设置为球观察光照
 		glColor3f(0.2, 0.2, 0.8);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glutSolidSphere(1, 50, 50);
@@ -147,13 +153,17 @@ void display()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glutSolidSphere(1, 50, 50);
 		break;
-	case EARTH://设置为球观察纹理及反光
+	case EARTH://设置为地球观察纹理
 		glPushMatrix();
 		glEnable(GL_TEXTURE_2D);
 		glRotatef(90, 1, 0, 0);
 		glRotatef(90, 0, 1, 0);
+		char localPath[MAX_PATH_NAME];
+		GetCurrentDirectoryA(MAX_PATH_NAME, localPath);
+		strcat(localPath, "\\");
+		strcat(localPath, "tu.jpg");
 		GLuint texid;
-		BuildTexture("F:\\学习\\大三上\\图形学\\simple\\tu.jpg", texid);
+		BuildTexture(localPath, texid);
 		glBindTexture(GL_TEXTURE_2D, texid);
 		glEnable(GL_TEXTURE_GEN_S);
 		glEnable(GL_TEXTURE_GEN_T);
@@ -178,7 +188,11 @@ void display()
 	glRotatef(90, 0, 1, 0);
 	button hint(windowLeft, windowDown, 2.26, 0.7);
 	hint.setTex(1);
-	hint.setTexImage("F:\\学习\\大三上\\图形学\\simple\\set.bmp");
+	char localPath[MAX_PATH_NAME];
+	GetCurrentDirectoryA(MAX_PATH_NAME, localPath);
+	strcat(localPath, "\\");
+	strcat(localPath, "set.bmp");
+	hint.setTexImage(localPath);
 	hint.show();
 	glPopMatrix();
 	glutSwapBuffers();//置换缓存（刷新画面，因为使用了双缓存）
@@ -257,7 +271,6 @@ void keyboard(unsigned char key, int _x, int _y) {
 }
 
 int main(int argc, char* argv[]) {
-	//model = BALL;
 	glutInit(&argc, argv);//初始化GLUT库；
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);//双缓存模式、RGB模式、三维模式？
 	glutInitWindowPosition(0, 0);
@@ -269,6 +282,7 @@ int main(int argc, char* argv[]) {
 	glEnable(GL_POLYGON_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glLineWidth(3);//使用3维光栅化
+	init();
 	glutReshapeFunc(reshape);//设置当窗口大小发生改变时调用的函数
 	glutDisplayFunc(display);//设置刷新函数
 	glutKeyboardFunc(keyboard);//设置键盘响应事件

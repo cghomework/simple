@@ -43,7 +43,6 @@ bool BuildTexture(char *filename,GLuint &texid )					// 载入一个.TGA 文件到内存
    {
 	szPath[0] = '\0';
 	strcat(szPath, filename);										// 添加图片的相对路径
-	printf("%s\n", szPath);
 	MultiByteToWideChar(CP_ACP, 0, szPath, -1, wszPath, MAX_PATH);		// 把ASCII码转化为Unicode标准码
 	HRESULT hr = OleLoadPicturePath(wszPath, 0, 0, 0, IID_IPicture, (void**)&pPicture);
 
