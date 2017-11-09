@@ -1,3 +1,8 @@
+Debug
+packages
+simple
+.vs
+*.sln
 # Prerequisites
 *.d
 
