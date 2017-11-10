@@ -12,14 +12,10 @@ using std::vector;
 using std::pair;
 
 #define MAX_PATH_NAME 128
-void init() {
-	
-
-}
 
 GLfloat windowLeft, windowDown;
-void reshape(int w, int h)//自动传入新窗口的大小（像素）
-{
+void reshape(int w, int h)
+{//自动传入新窗口的大小（像素）
 	glViewport(0, 0, w, h);//在窗口中显示的区域：显示区域左下角坐标显示区域的宽度与高度
 	glMatrixMode(GL_PROJECTION);//申明将要进行投影设置操作
 	glLoadIdentity();//重置变换矩阵
@@ -44,8 +40,6 @@ void reshape(int w, int h)//自动传入新窗口的大小（像素）
 	glMatrixMode(GL_MODELVIEW);//申明将进行视景设置操作
 	glLoadIdentity();//重置变换矩阵
 					 //ps.当参数是GL_TEXTURE时可以进行纹理操作
-
-
 }
 
 GLfloat vertices[][3] = { { -1.0,-1.0,-1.0 },{ 1.0,-1.0,-1.0 },{ 1.0,1.0,-1.0 },{ -1.0,1.0,-1.0 },{ -1.0,-1.0,1.0 },
@@ -55,7 +49,7 @@ GLfloat colors[][3] = { { 1.0,0.0,0.0 },{ 0.0,1.0,1.0 },{ 1.0,1.0,0.0 },{ 0.0,1.
 { 1.0,0.0,1.0 },{ 0.0,1.0,1.0 },{ 1.0,1.0,1.0 } };//每个点的颜色
 
 void polygon(int a, int b, int c, int d, bool line)
-{
+{//画正方形
 	if (!line) {
 		glBegin(GL_POLYGON);
 		glColor3fv(colors[a]);
@@ -89,7 +83,7 @@ void colorcube(bool line)
 
 }
 
-void setLight() {
+void setLight() {//添加光照
 	GLfloat lmodel_ambient[] = { 1,1,1,1 };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
@@ -108,6 +102,50 @@ void setLight() {
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, light);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, light);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 50.0);
+}
+
+void showEarth() {//显示地球
+	glPushMatrix();
+	glEnable(GL_TEXTURE_2D);
+	glRotatef(90, 1, 0, 0);
+	glRotatef(90, 0, 1, 0);
+	char localPath[MAX_PATH_NAME];
+	GetCurrentDirectoryA(MAX_PATH_NAME, localPath);
+	strcat(localPath, "\\");
+	strcat(localPath, "tu.jpg");
+	GLuint texid;
+	BuildTexture(localPath, texid);
+	glBindTexture(GL_TEXTURE_2D, texid);
+	glEnable(GL_TEXTURE_GEN_S);
+	glEnable(GL_TEXTURE_GEN_T);
+	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+	glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+	GLfloat planes[] = { 0.5,0,0,0.5 };
+	GLfloat planet[] = { 0,0.5,0,0.5 };
+	glTexGenfv(GL_S, GL_OBJECT_PLANE, planes);
+	glTexGenfv(GL_T, GL_OBJECT_PLANE, planet);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glutSolidSphere(1, 50, 50);
+	glDisable(GL_TEXTURE_GEN_S);
+	glDisable(GL_TEXTURE_GEN_T);
+	glDisable(GL_TEXTURE_2D);
+	glPopMatrix();
+}
+
+void showHint() {//显示提示
+	glPushMatrix();
+	glTranslatef(10, 0, 0);
+	glRotatef(90, 1, 0, 0);
+	glRotatef(90, 0, 1, 0);
+	button hint(windowLeft, windowDown, 2.26, 0.7);
+	hint.setTex(1);
+	char localPath[MAX_PATH_NAME];
+	GetCurrentDirectoryA(MAX_PATH_NAME, localPath);
+	strcat(localPath, "\\");
+	strcat(localPath, "set.bmp");
+	hint.setTexImage(localPath);
+	hint.show();
+	glPopMatrix();
 }
 
 enum Model { CUBE_SLOID, CUBE_LINE, CUBE_POINT, BALL, EARTH }model;
@@ -129,7 +167,7 @@ void display()
 
 	glScalef(bigger, bigger, bigger);//设置放大
 	 
-	switch (model) {
+	switch (model) {//显示模型
 	case CUBE_SLOID://设置面着色模式
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		colorcube(false);
@@ -154,52 +192,16 @@ void display()
 		glutSolidSphere(1, 50, 50);
 		break;
 	case EARTH://设置为地球观察纹理
-		glPushMatrix();
-		glEnable(GL_TEXTURE_2D);
-		glRotatef(90, 1, 0, 0);
-		glRotatef(90, 0, 1, 0);
-		char localPath[MAX_PATH_NAME];
-		GetCurrentDirectoryA(MAX_PATH_NAME, localPath);
-		strcat(localPath, "\\");
-		strcat(localPath, "tu.jpg");
-		GLuint texid;
-		BuildTexture(localPath, texid);
-		glBindTexture(GL_TEXTURE_2D, texid);
-		glEnable(GL_TEXTURE_GEN_S);
-		glEnable(GL_TEXTURE_GEN_T);
-		glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-		glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-		GLfloat planes[] = { 0.5,0,0,0.5 };
-		GLfloat planet[] = { 0,0.5,0,0.5 };
-		glTexGenfv(GL_S, GL_OBJECT_PLANE, planes);
-		glTexGenfv(GL_T, GL_OBJECT_PLANE, planet);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glutSolidSphere(1, 50, 50);
-		glDisable(GL_TEXTURE_GEN_S);
-		glDisable(GL_TEXTURE_GEN_T);
-		glDisable(GL_TEXTURE_2D);
-		glPopMatrix();
+		showEarth();
 		break;
 	}
 	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(10, 0, 0);
-	glRotatef(90, 1, 0, 0);
-	glRotatef(90, 0, 1, 0);
-	button hint(windowLeft, windowDown, 2.26, 0.7);
-	hint.setTex(1);
-	char localPath[MAX_PATH_NAME];
-	GetCurrentDirectoryA(MAX_PATH_NAME, localPath);
-	strcat(localPath, "\\");
-	strcat(localPath, "set.bmp");
-	hint.setTexImage(localPath);
-	hint.show();
-	glPopMatrix();
+	showHint();//显示提示
 	glutSwapBuffers();//置换缓存（刷新画面，因为使用了双缓存）
 }
 
 
-void logRotate(int axis, int count) {
+void logRotate(int axis, int count) {//记录旋转情况
 	if (rotateLog.size() == 0)
 		rotateLog.push_back(pair<int, GLfloat>(axis, count));
 	else if (rotateLog.back().first == axis) {
@@ -282,7 +284,6 @@ int main(int argc, char* argv[]) {
 	glEnable(GL_POLYGON_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glLineWidth(3);//使用3维光栅化
-	init();
 	glutReshapeFunc(reshape);//设置当窗口大小发生改变时调用的函数
 	glutDisplayFunc(display);//设置刷新函数
 	glutKeyboardFunc(keyboard);//设置键盘响应事件
